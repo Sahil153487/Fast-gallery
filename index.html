@@ -4,96 +4,91 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#000000">
-    <title>Sahil AI Cloud</title>
+    <title>Sahil Ultimate Cloud</title>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet"></script>
     
     <style>
-        /* --- AI CYBERPUNK THEME --- */
-        :root { --primary: #00ffcc; --bg: #050505; --surface: #111; }
-        body { 
-            background-color: var(--bg); color: #fff; font-family: sans-serif; 
-            margin: 0; padding: 0; padding-bottom: 100px; user-select: none;
-        }
+        :root { --primary: #00ffcc; --bg: #000000; }
+        body { background-color: var(--bg); color: #fff; font-family: sans-serif; margin: 0; padding-bottom: 100px; user-select: none; }
         
-        /* Search Bar (AI Input) */
-        .search-area {
-            position: sticky; top: 0; z-index: 50;
-            background: rgba(0,0,0,0.9); backdrop-filter: blur(10px);
-            padding: 15px; border-bottom: 1px solid #333;
+        /* Header */
+        .header {
+            padding: 15px; background: rgba(20,20,20,0.95); border-bottom: 1px solid #333;
+            display: flex; justify-content: space-between; align-items: center;
+            position: sticky; top: 0; z-index: 50; backdrop-filter: blur(5px);
         }
+        .logo { font-weight: 900; color: var(--primary); letter-spacing: 1px; }
+        
+        /* Search */
         .search-box {
-            width: 100%; background: #222; border: 1px solid #333;
-            padding: 12px 20px; border-radius: 50px; color: #fff;
-            font-size: 16px; outline: none; transition: 0.3s;
-            background-image: url('https://cdn-icons-png.flaticon.com/512/11741/11741045.png'); /* Search Icon */
-            background-size: 20px; background-repeat: no-repeat;
-            background-position: 95% center;
-        }
-        .search-box:focus { border-color: var(--primary); box-shadow: 0 0 15px rgba(0,255,204,0.3); }
-
-        /* AI Status Badge */
-        .ai-badge {
-            text-align: center; font-size: 10px; color: var(--primary); 
-            margin-top: 5px; letter-spacing: 1px; display: none;
+            width: 90%; background: #1a1a1a; border: 1px solid #333; margin: 10px auto;
+            padding: 12px 20px; border-radius: 50px; color: #fff; font-size: 16px; display: block;
         }
 
-        /* Gallery Grid */
+        /* Grid */
         .gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; padding: 2px; }
         .item { 
             width: 100%; aspect-ratio: 1/1; object-fit: cover; 
-            background: #151515; position: relative;
+            background: #111; position: relative; border: 1px solid #222; overflow: hidden;
         }
-        .item-tag {
-            position: absolute; bottom: 0; left: 0; right: 0;
-            background: rgba(0,0,0,0.7); color: #fff; font-size: 8px;
-            padding: 2px; text-align: center; white-space: nowrap; overflow: hidden;
+        
+        /* Icons */
+        .icon-view {
+            display: flex; align-items: center; justify-content: center; flex-direction: column;
+            height: 100%; width: 100%; font-size: 30px;
+        }
+        .pdf-style { background: #220000; color: #ff4444; }
+        .vid-style { background: #001122; color: #4488ff; }
+        
+        .tag {
+            position: absolute; bottom: 0; left: 0; width: 100%;
+            background: rgba(0,0,0,0.7); font-size: 9px; padding: 2px 0;
+            text-align: center; color: #fff; white-space: nowrap; overflow: hidden;
         }
 
-        /* Floating Button */
-        .fab-container { position: fixed; bottom: 85px; right: 20px; z-index: 100; }
+        /* FAB */
+        .fab-container { position: fixed; bottom: 30px; right: 20px; z-index: 100; }
         .fab {
             width: 65px; height: 65px; border-radius: 50%; border: none;
-            background: var(--primary); color: #000; font-size: 35px;
-            box-shadow: 0 0 25px rgba(0, 255, 204, 0.5);
-            display: flex; align-items: center; justify-content: center;
+            background: var(--primary); color: #000; font-size: 30px;
+            box-shadow: 0 0 20px rgba(0, 255, 204, 0.5);
         }
 
-        /* AI Loader Overlay */
-        #ai-overlay {
+        /* Loading Screen */
+        #ai-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.96); display: none; z-index: 200;
+            background: rgba(0,0,0,0.95); z-index: 200; display: none;
             flex-direction: column; justify-content: center; align-items: center;
         }
-        .scan-line {
-            width: 100%; height: 2px; background: var(--primary);
-            box-shadow: 0 0 10px var(--primary);
-            animation: scan 1.5s infinite;
-        }
-        @keyframes scan { 0% {transform: translateY(-100px); opacity:0;} 50% {opacity:1;} 100% {transform: translateY(100px); opacity:0;} }
+        .progress-bar { width: 60%; height: 4px; background: #333; margin-top: 20px; }
+        .progress-fill { width: 0%; height: 100%; background: var(--primary); transition: width 0.3s; }
     </style>
 </head>
 <body>
 
-    <div id="ai-overlay">
-        <img src="https://cdn-icons-png.flaticon.com/512/2103/2103633.png" width="60" style="filter: invert(1);">
-        <h3 style="color:var(--primary); font-family:monospace; margin-bottom:50px;">AI ANALYZING...</h3>
-        <div class="scan-line"></div>
-        <p id="ai-text" style="color:#888; font-size:12px; margin-top:20px;">Identifying Objects...</p>
+    <div id="ai-screen">
+        <h2 style="color:var(--primary);">PROCESSING...</h2>
+        <p id="ai-step" style="color:#888; font-size:12px; margin-top:10px;">Analyzing File...</p>
+        <div class="progress-bar"><div class="progress-fill" id="p-fill"></div></div>
     </div>
 
-    <div class="search-area">
-        <input type="text" id="searchInp" class="search-box" placeholder="Search (e.g. 'Laptop', 'Car')..." onkeyup="filterGallery()">
-        <div class="ai-badge" id="aiStatus">● AI BRAIN ACTIVE</div>
+    <div class="header">
+        <div class="logo">SAHIL CLOUD</div>
+        <div style="font-size:10px; color:#aaa">ALL FILES</div>
     </div>
 
+    <input type="text" id="search" class="search-box" placeholder="Search files..." onkeyup="filter()">
     <div class="gallery" id="grid"></div>
 
     <div class="fab-container">
-        <button class="fab" onclick="document.getElementById('fileInp').click()">+</button>
+        <button class="fab" onclick="document.getElementById('inp').click()">+</button>
     </div>
-    <input type="file" id="fileInp" multiple accept="image/*" style="display:none" onchange="processWithAI()">
-    <img id="tempImg" width="224" height="224" style="display:none">
+    
+    <input type="file" id="inp" multiple accept="image/*,video/*,application/pdf" style="display:none" onchange="startProcess()">
+    
+    <img id="tempImg" style="display:none" crossorigin="anonymous">
+    <canvas id="compressor" style="display:none"></canvas>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -115,117 +110,153 @@
         const grid = document.getElementById('grid');
         let aiModel = null;
 
-        // 1. LOAD AI MODEL (Background)
-        async function loadAI() {
-            try {
-                console.log("Loading AI...");
-                aiModel = await mobilenet.load();
-                document.getElementById('aiStatus').style.display = 'block';
-                console.log("AI Ready!");
-            } catch (e) { console.error("AI Load Failed", e); }
-        }
+        // Load AI
+        async function loadAI() { try { aiModel = await mobilenet.load(); } catch (e) {} }
         loadAI();
 
-        // 2. AI PROCESSING LOGIC
-        window.processWithAI = async function() {
-            const files = document.getElementById('fileInp').files;
+        // 1. SMART PROCESSOR
+        window.startProcess = async function() {
+            const files = document.getElementById('inp').files;
             if(!files.length) return;
 
-            document.getElementById('ai-overlay').style.display = 'flex';
-            const aiText = document.getElementById('ai-text');
+            const screen = document.getElementById('ai-screen');
+            const status = document.getElementById('ai-step');
+            const bar = document.getElementById('p-fill');
+            screen.style.display = 'flex';
 
-            for (let file of files) {
-                // Image recognition step
-                let tags = "IMG";
-                if(file.type.startsWith('image') && aiModel) {
-                    aiText.innerText = "Scanning: " + file.name;
-                    tags = await predictImage(file); // AI guess karega
+            for(let i=0; i<files.length; i++) {
+                const file = files[i];
+                let fileToUpload = file;
+                let tag = "File";
+                let folder = "Others/";
+
+                // LOGIC TREE
+                if(file.type.startsWith('image')) {
+                    // IMAGE: AI + Compress
+                    folder = "SmartGallery/";
+                    status.innerText = `👁️ AI Scanning: ${file.name}`;
+                    bar.style.width = "30%";
+                    if(aiModel) tag = await identify(file);
+                    
+                    status.innerText = `💾 Compressing Image...`;
+                    bar.style.width = "60%";
+                    fileToUpload = await compress(file);
+
+                } else if(file.type.startsWith('video')) {
+                    // VIDEO: Direct Upload
+                    folder = "Videos/";
+                    tag = "Video";
+                    status.innerText = `🎥 Preparing Video: ${file.name}`;
+                    bar.style.width = "50%";
+
+                } else if(file.type.includes('pdf')) {
+                    // PDF: Direct Upload
+                    folder = "Documents/";
+                    tag = "Doc";
+                    status.innerText = `📄 Preparing PDF: ${file.name}`;
+                    bar.style.width = "50%";
                 }
 
-                // AI Renaming the file
-                const newName = `${tags}_${Date.now()}.jpg`; // Example: Laptop_12345.jpg
-                
-                // Upload logic
-                aiText.innerText = "Uploading to Cloud: " + tags;
-                await uploadFile(file, newName);
+                // UPLOAD
+                status.innerText = `🚀 Uploading...`;
+                bar.style.width = "90%";
+                const ext = file.name.split('.').pop();
+                const newName = `${tag}_${Date.now()}.${ext}`;
+                await upload(fileToUpload, folder + newName, tag);
             }
 
-            document.getElementById('ai-overlay').style.display = 'none';
-            alert("✅ AI Scan Complete! Photos Saved.");
+            screen.style.display = 'none';
+            alert("✅ ALL FILES UPLOADED!");
         };
 
-        // Helper: Predict what is in the image
-        function predictImage(file) {
-            return new Promise((resolve) => {
+        // Identify Image
+        function identify(file) {
+            return new Promise(resolve => {
                 const img = document.getElementById('tempImg');
                 img.src = URL.createObjectURL(file);
                 img.onload = async () => {
                     const predictions = await aiModel.classify(img);
-                    // Sabse top prediction le lo (e.g. 'cup')
-                    if(predictions && predictions.length > 0) {
-                        const cleanTag = predictions[0].className.split(',')[0].replace(/\s/g, '');
-                        resolve(cleanTag);
-                    } else {
-                        resolve("Unknown");
-                    }
+                    if(predictions && predictions.length) resolve(predictions[0].className.split(',')[0].trim());
+                    else resolve("Photo");
                 };
             });
         }
 
-        // 3. UPLOAD TO FIREBASE
-        function uploadFile(file, name) {
-            return new Promise((resolve) => {
-                const sRef = ref(storage, 'AI_Gallery/' + name);
+        // Compress Image
+        function compress(file) {
+            return new Promise(resolve => {
+                const img = document.createElement('img');
+                img.src = URL.createObjectURL(file);
+                img.onload = () => {
+                    const canvas = document.getElementById('compressor');
+                    const ctx = canvas.getContext('2d');
+                    const maxWidth = 1200;
+                    const scale = maxWidth / img.width;
+                    canvas.width = (scale < 1) ? maxWidth : img.width;
+                    canvas.height = (scale < 1) ? img.height * scale : img.height;
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    canvas.toBlob((blob) => resolve(blob), 'image/jpeg', 0.7); 
+                };
+            });
+        }
+
+        // Upload Helper
+        function upload(file, path, tag) {
+            return new Promise(resolve => {
+                const sRef = ref(storage, path);
                 const task = uploadBytesResumable(sRef, file);
                 task.on('state_changed', null, null, () => {
                     getDownloadURL(task.snapshot.ref).then(url => {
-                        displayItem(url, name);
+                        show(url, path.split('/')[1], tag); // Pass filename & tag
                         resolve();
                     });
                 });
             });
         }
 
-        // 4. DISPLAY & SEARCH
+        // Display Gallery
         function loadGallery() {
-            listAll(ref(storage, 'AI_Gallery/')).then(res => {
-                res.items.forEach(item => {
-                    getDownloadURL(item).then(url => displayItem(url, item.name));
+            // Load all 3 folders
+            ['SmartGallery/', 'Videos/', 'Documents/'].forEach(folder => {
+                listAll(ref(storage, folder)).then(res => {
+                    res.items.forEach(item => getDownloadURL(item).then(u => {
+                        // Determine tag based on folder or filename
+                        let tag = "File";
+                        if(folder.includes('Smart')) tag = item.name.split('_')[0];
+                        if(folder.includes('Video')) tag = "Video";
+                        if(folder.includes('Doc')) tag = "Doc";
+                        show(u, item.name, tag);
+                    }));
                 });
             });
         }
 
-        function displayItem(url, name) {
-            // Name se tags nikalo (Example: Laptop_123.jpg -> Tag: Laptop)
-            const tag = name.split('_')[0]; 
-
+        function show(url, name, tag) {
             const div = document.createElement('div');
             div.className = 'item';
-            div.style.backgroundImage = `url('${url}')`;
-            div.setAttribute('data-tag', tag.toLowerCase()); // Search ke liye
             div.onclick = () => window.open(url, '_blank');
+            div.setAttribute('data-tag', tag.toLowerCase());
 
-            // Show AI Tag on image
-            const tagEl = document.createElement('div');
-            tagEl.className = 'item-tag';
-            tagEl.innerText = "🤖 " + tag;
-            div.appendChild(tagEl);
+            const lowerName = name.toLowerCase();
 
+            if(lowerName.includes('.pdf')) {
+                // PDF VIEW
+                div.innerHTML = `<div class="icon-view pdf-style">📄<span style="font-size:10px;margin-top:5px">PDF</span></div><div class="tag">${tag}</div>`;
+            } else if(lowerName.includes('.mp4') || lowerName.includes('.webm') || lowerName.includes('.mov')) {
+                // VIDEO VIEW
+                div.innerHTML = `<div class="icon-view vid-style">▶️<span style="font-size:10px;margin-top:5px">VIDEO</span></div><div class="tag">${tag}</div>`;
+            } else {
+                // IMAGE VIEW
+                div.style.backgroundImage = `url('${url}')`;
+                div.innerHTML = `<div class="tag">${tag}</div>`;
+            }
             grid.prepend(div);
         }
 
-        // 5. SEARCH FILTER FUNCTION
-        window.filterGallery = function() {
-            const query = document.getElementById('searchInp').value.toLowerCase();
-            const items = document.querySelectorAll('.item');
-            
-            items.forEach(item => {
-                const tag = item.getAttribute('data-tag');
-                if(tag.includes(query) || query === "") {
-                    item.style.display = 'block';
-                } else {
-                    item.style.display = 'none';
-                }
+        window.filter = function() {
+            const q = document.getElementById('search').value.toLowerCase();
+            document.querySelectorAll('.item').forEach(el => {
+                el.style.display = el.getAttribute('data-tag').includes(q) ? 'block' : 'none';
             });
         };
 
