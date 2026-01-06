@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚡ Superfast Cloud Gallery</title>
+    <style>
+        /* 5G Optimized Styling */
+        body { background-color: #000; color: #fff; font-family: sans-serif; margin: 0; padding: 15px; }
+        h2 { text-align: center; color: #00ffcc; margin-bottom: 20px; font-weight: 900; letter-spacing: 1px; }
+        
+        /* Upload Button - Big & Easy */
+        .upload-zone { 
+            background: #111; border: 2px dashed #00ffcc; padding: 30px; 
+            border-radius: 15px; text-align: center; margin-bottom: 25px;
+        }
+        .btn { 
+            background: linear-gradient(45deg, #00ffcc, #00ccff); color: #000; 
+            padding: 15px 40px; font-size: 20px; font-weight: bold; border: none; 
+            border-radius: 50px; cursor: pointer; box-shadow: 0 4px 15px rgba(0,255,204,0.4);
+        }
+        
+        /* Fast Grid Layout */
+        .gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+        .gallery img { 
+            width: 100%; height: 150px; object-fit: cover; border-radius: 8px; 
+            border: 1px solid #333; transition: transform 0.2s; background: #222;
+        }
+        .gallery img:active { transform: scale(0.95); }
+
+        /* Speed Loader */
+        #loader { width: 0%; height: 6px; background: #00ffcc; position: fixed; top: 0; left: 0; transition: width 0.1s linear; }
+    </style>
+</head>
+<body>
+
+    <div id="loader"></div>
+    <h2>⚡ SAHIL CLOUD 5G</h2>
+
+    <div class="upload-zone">
+        <p style="color:#aaa; margin-bottom:15px;">Phone Memory Full? Upload Here.</p>
+        <button class="btn" onclick="document.getElementById('inp').click()">🚀 UPLOAD NOW</button>
+        <input type="file" id="inp" multiple accept="image/*,video/*" style="display:none" onchange="up()">
+    </div>
+
+    <div class="gallery" id="grid"></div>
+
+    <script type="module">
+        // Importing tools from Internet (CDN)
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getStorage, ref, uploadBytesResumable, getDownloadURL, listAll } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+
+        // ======================================================
+        // ✅ CORRECTED CONFIGURATION (Tumhara Code Sahi Kar Diya)
+        // ======================================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyDScnh2HnQS9N60mGTRKcthHoRpxpANpB0",
+            authDomain: "sahil-cloud-gallery.firebaseapp.com",
+            projectId: "sahil-cloud-gallery",
+            storageBucket: "sahil-cloud-gallery.firebasestorage.app",
+            messagingSenderId: "324079201866",
+            appId: "1:324079201866:web:634840b962a96988d280b3",
+            measurementId: "G-SY8911CV7E"
+        };
+        // ======================================================
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const storage = getStorage(app);
+
+        // Upload Logic (Super Fast)
+        window.up = function() {
+            const files = document.getElementById('inp').files;
+            if(!files.length) return;
+            
+            // Speed Optimizations for 5G
+            Array.from(files).forEach(file => {
+                // File name save logic
+                const sRef = ref(storage, 'FastGallery/' + Date.now() + '_' + file.name);
+                const task = uploadBytesResumable(sRef, file);
+                
+                task.on('state_changed', 
+                    (snap) => {
+                        const p = (snap.bytesTransferred / snap.totalBytes) * 100;
+                        document.getElementById('loader').style.width = p + '%';
+                    },
+                    (err) => alert("Error: " + err.message),
+                    () => {
+                        getDownloadURL(task.snapshot.ref).then(url => {
+                            show(url);
+                            document.getElementById('loader').style.width = '0%';
+                            // Success Alert (Optional, hata diya taaki speed fast lage)
+                        });
+                    }
+                );
+            });
+            alert("🚀 Uploading Started! Wait a moment...");
+        };
+
+        // Load Images Logic
+        function load() {
+            const listRef = ref(storage, 'FastGallery/');
+            listAll(listRef).then((res) => {
+                res.items.forEach((item) => {
+                    getDownloadURL(item).then(url => show(url));
+                });
+            });
+        }
+
+        function show(url) {
+            const img = document.createElement('img');
+            img.src = url;
+            img.loading = "lazy";
+            img.onclick = () => window.open(url, '_blank');
+            document.getElementById('grid').prepend(img);
+        }
+
+        load();
+    </script>
+</body>
+</html>
+
