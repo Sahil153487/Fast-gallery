@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#000000">
-    <title>Sahil Ultimate Cloud</title>
+    <title>Sahil Lifetime Cloud</title>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet"></script>
     
@@ -12,18 +12,19 @@
         :root { --primary: #00ffcc; --bg: #000000; }
         body { background-color: var(--bg); color: #fff; font-family: sans-serif; margin: 0; padding-bottom: 100px; user-select: none; }
         
-        /* Header */
+        /* Router Style Header */
         .header {
-            padding: 15px; background: rgba(20,20,20,0.95); border-bottom: 1px solid #333;
+            padding: 15px; background: rgba(10,10,10,0.95); border-bottom: 1px solid #333;
             display: flex; justify-content: space-between; align-items: center;
             position: sticky; top: 0; z-index: 50; backdrop-filter: blur(5px);
         }
-        .logo { font-weight: 900; color: var(--primary); letter-spacing: 1px; }
+        .logo { font-weight: 900; color: var(--primary); letter-spacing: 1px; font-size: 18px; }
+        .server-status { font-size: 10px; color: #0f0; border: 1px solid #0f0; padding: 2px 6px; border-radius: 4px; }
         
         /* Search */
         .search-box {
-            width: 90%; background: #1a1a1a; border: 1px solid #333; margin: 10px auto;
-            padding: 12px 20px; border-radius: 50px; color: #fff; font-size: 16px; display: block;
+            width: 90%; background: #111; border: 1px solid #333; margin: 15px auto;
+            padding: 12px 20px; border-radius: 8px; color: #fff; font-size: 16px; display: block;
         }
 
         /* Grid */
@@ -33,26 +34,27 @@
             background: #111; position: relative; border: 1px solid #222; overflow: hidden;
         }
         
-        /* Icons */
+        /* File Type Icons */
         .icon-view {
             display: flex; align-items: center; justify-content: center; flex-direction: column;
-            height: 100%; width: 100%; font-size: 30px;
+            height: 100%; width: 100%; font-size: 28px;
         }
-        .pdf-style { background: #220000; color: #ff4444; }
-        .vid-style { background: #001122; color: #4488ff; }
+        .pdf-style { background: #2a0000; color: #ff5555; }
+        .vid-style { background: #001a33; color: #4488ff; }
         
         .tag {
             position: absolute; bottom: 0; left: 0; width: 100%;
-            background: rgba(0,0,0,0.7); font-size: 9px; padding: 2px 0;
-            text-align: center; color: #fff; white-space: nowrap; overflow: hidden;
+            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent); 
+            font-size: 10px; padding: 4px 0;
+            text-align: center; color: #eee; white-space: nowrap; overflow: hidden;
         }
 
-        /* FAB */
+        /* FAB (Upload Button) */
         .fab-container { position: fixed; bottom: 30px; right: 20px; z-index: 100; }
         .fab {
             width: 65px; height: 65px; border-radius: 50%; border: none;
             background: var(--primary); color: #000; font-size: 30px;
-            box-shadow: 0 0 20px rgba(0, 255, 204, 0.5);
+            box-shadow: 0 0 25px rgba(0, 255, 204, 0.4); cursor: pointer;
         }
 
         /* Loading Screen */
@@ -61,24 +63,26 @@
             background: rgba(0,0,0,0.95); z-index: 200; display: none;
             flex-direction: column; justify-content: center; align-items: center;
         }
-        .progress-bar { width: 60%; height: 4px; background: #333; margin-top: 20px; }
+        .progress-bar { width: 70%; height: 4px; background: #333; margin-top: 20px; border-radius: 2px; }
         .progress-fill { width: 0%; height: 100%; background: var(--primary); transition: width 0.3s; }
+        .blink { animation: blinker 1.5s linear infinite; color: var(--primary); }
+        @keyframes blinker { 50% { opacity: 0.5; } }
     </style>
 </head>
 <body>
 
     <div id="ai-screen">
-        <h2 style="color:var(--primary);">PROCESSING...</h2>
-        <p id="ai-step" style="color:#888; font-size:12px; margin-top:10px;">Analyzing File...</p>
+        <h2 class="blink">CLOUD SYNC...</h2>
+        <p id="ai-step" style="color:#888; font-size:12px; margin-top:10px;">Connecting to Server...</p>
         <div class="progress-bar"><div class="progress-fill" id="p-fill"></div></div>
     </div>
 
     <div class="header">
-        <div class="logo">SAHIL CLOUD</div>
-        <div style="font-size:10px; color:#aaa">ALL FILES</div>
+        <div class="logo">SAHIL ROUTER</div>
+        <div class="server-status">● LIFETIME FREE</div>
     </div>
 
-    <input type="text" id="search" class="search-box" placeholder="Search files..." onkeyup="filter()">
+    <input type="text" id="search" class="search-box" placeholder="🔍 Search Files..." onkeyup="filter()">
     <div class="gallery" id="grid"></div>
 
     <div class="fab-container">
@@ -94,7 +98,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getStorage, ref, uploadBytesResumable, getDownloadURL, listAll } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
-        // CONFIG (Tumhari wali)
+        // ✅ YOUR LIFETIME FREE CONFIG
         const firebaseConfig = {
             apiKey: "AIzaSyDScnh2HnQS9N60mGTRKcthHoRpxpANpB0",
             authDomain: "sahil-cloud-gallery.firebaseapp.com",
@@ -114,7 +118,7 @@
         async function loadAI() { try { aiModel = await mobilenet.load(); } catch (e) {} }
         loadAI();
 
-        // 1. SMART PROCESSOR
+        // 1. SMART UPLOAD SYSTEM
         window.startProcess = async function() {
             const files = document.getElementById('inp').files;
             if(!files.length) return;
@@ -130,35 +134,30 @@
                 let tag = "File";
                 let folder = "Others/";
 
-                // LOGIC TREE
                 if(file.type.startsWith('image')) {
-                    // IMAGE: AI + Compress
                     folder = "SmartGallery/";
-                    status.innerText = `👁️ AI Scanning: ${file.name}`;
+                    status.innerText = `👁️ AI Vision: Scanning ${file.name}`;
                     bar.style.width = "30%";
                     if(aiModel) tag = await identify(file);
                     
-                    status.innerText = `💾 Compressing Image...`;
+                    status.innerText = `💾 Space Saver: Compressing...`;
                     bar.style.width = "60%";
-                    fileToUpload = await compress(file);
+                    fileToUpload = await compress(file); // Saves storage
 
                 } else if(file.type.startsWith('video')) {
-                    // VIDEO: Direct Upload
                     folder = "Videos/";
                     tag = "Video";
-                    status.innerText = `🎥 Preparing Video: ${file.name}`;
+                    status.innerText = `🎥 Processing Video...`;
                     bar.style.width = "50%";
 
                 } else if(file.type.includes('pdf')) {
-                    // PDF: Direct Upload
                     folder = "Documents/";
                     tag = "Doc";
-                    status.innerText = `📄 Preparing PDF: ${file.name}`;
+                    status.innerText = `📄 Uploading Document...`;
                     bar.style.width = "50%";
                 }
 
-                // UPLOAD
-                status.innerText = `🚀 Uploading...`;
+                status.innerText = `🚀 Syncing to Cloud...`;
                 bar.style.width = "90%";
                 const ext = file.name.split('.').pop();
                 const newName = `${tag}_${Date.now()}.${ext}`;
@@ -166,7 +165,7 @@
             }
 
             screen.style.display = 'none';
-            alert("✅ ALL FILES UPLOADED!");
+            alert("✅ Saved to Cloud! Safe to delete from phone.");
         };
 
         // Identify Image
@@ -182,7 +181,7 @@
             });
         }
 
-        // Compress Image
+        // Compress Image (The "Jugad" for Space)
         function compress(file) {
             return new Promise(resolve => {
                 const img = document.createElement('img');
@@ -190,12 +189,12 @@
                 img.onload = () => {
                     const canvas = document.getElementById('compressor');
                     const ctx = canvas.getContext('2d');
-                    const maxWidth = 1200;
+                    const maxWidth = 1000; // Smaller size
                     const scale = maxWidth / img.width;
                     canvas.width = (scale < 1) ? maxWidth : img.width;
                     canvas.height = (scale < 1) ? img.height * scale : img.height;
                     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                    canvas.toBlob((blob) => resolve(blob), 'image/jpeg', 0.7); 
+                    canvas.toBlob((blob) => resolve(blob), 'image/jpeg', 0.6); // 60% Quality
                 };
             });
         }
@@ -207,7 +206,7 @@
                 const task = uploadBytesResumable(sRef, file);
                 task.on('state_changed', null, null, () => {
                     getDownloadURL(task.snapshot.ref).then(url => {
-                        show(url, path.split('/')[1], tag); // Pass filename & tag
+                        show(url, path.split('/')[1], tag);
                         resolve();
                     });
                 });
@@ -216,11 +215,9 @@
 
         // Display Gallery
         function loadGallery() {
-            // Load all 3 folders
             ['SmartGallery/', 'Videos/', 'Documents/'].forEach(folder => {
                 listAll(ref(storage, folder)).then(res => {
                     res.items.forEach(item => getDownloadURL(item).then(u => {
-                        // Determine tag based on folder or filename
                         let tag = "File";
                         if(folder.includes('Smart')) tag = item.name.split('_')[0];
                         if(folder.includes('Video')) tag = "Video";
@@ -240,13 +237,10 @@
             const lowerName = name.toLowerCase();
 
             if(lowerName.includes('.pdf')) {
-                // PDF VIEW
-                div.innerHTML = `<div class="icon-view pdf-style">📄<span style="font-size:10px;margin-top:5px">PDF</span></div><div class="tag">${tag}</div>`;
-            } else if(lowerName.includes('.mp4') || lowerName.includes('.webm') || lowerName.includes('.mov')) {
-                // VIDEO VIEW
-                div.innerHTML = `<div class="icon-view vid-style">▶️<span style="font-size:10px;margin-top:5px">VIDEO</span></div><div class="tag">${tag}</div>`;
+                div.innerHTML = `<div class="icon-view pdf-style">📄</div><div class="tag">${tag}</div>`;
+            } else if(lowerName.includes('.mp4')) {
+                div.innerHTML = `<div class="icon-view vid-style">▶️</div><div class="tag">${tag}</div>`;
             } else {
-                // IMAGE VIEW
                 div.style.backgroundImage = `url('${url}')`;
                 div.innerHTML = `<div class="tag">${tag}</div>`;
             }
